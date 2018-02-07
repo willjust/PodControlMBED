@@ -3,6 +3,9 @@
 *.o
 *.swp
 
+*.lib
+.mbed
+mbed_settings*
 /BUILD
-
+/mbed-os
 
