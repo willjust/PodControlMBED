@@ -7,10 +7,13 @@
   * @param int* recieve field of CANMessage
   */
 typedef struct {
-	int header;
-	void (*func)(int, int*);
+	uint header;
+	void (*func)(CANMessage *recieve);
 } CanHandle;
 
+void tmpBmsCellBroadcast();
+void heartbeat();
+void canLogger(CANMessage *recieve);
 int initializeCanParser();
-
+int canHandler(CANMessage *msg);
 #endif

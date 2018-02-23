@@ -1,11 +1,12 @@
 #include "mbed.h"
 #include "CanFunctions.h"
+#include "main.h"
 
 CAN can(PA_11, PA_12);
 extern CanHandle* canHandles;
 
 int initializeCan() {
-	can.frequency(1e9);
+	can.frequency(250e3);
 	initializeCanParser();
 	return 0;
 }
@@ -14,7 +15,7 @@ int initializeCan() {
 /*                      Primary Board Code                                   */
 /*****************************************************************************/
 
-#ifdef PRIMARY
+#if PRIMARY
 Serial pc(USBTX, USBRX);
 
 /**
@@ -23,7 +24,7 @@ Serial pc(USBTX, USBRX);
 short init(DigitalOut outPin) {
 	pc.baud(9600);
 	initializeCan();
-
+	printf("Initilization Complete.\n");
     outPin = 1;
     return 0;   
 }
