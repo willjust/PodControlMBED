@@ -11,6 +11,20 @@ typedef struct {
 	void (*func)(CANMessage *recieve);
 } CanHandle;
 
+typedef struct {
+	char cellId;
+	unsigned short voltage;
+	unsigned short openVoltage;
+	unsigned short resistance;
+} CellData;
+
+typedef struct {
+	unsigned int cellMax = 0;
+	CellData* cells;
+	char maxTemp;
+	char minTemp;
+} BMSData;
+
 void tmpBmsCellBroadcast();
 void heartbeat();
 void canLogger(CANMessage *recieve);

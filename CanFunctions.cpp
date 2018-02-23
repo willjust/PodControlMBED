@@ -3,9 +3,10 @@
 #include "main.h"
 
 extern DigitalOut heartBeatLED;
-int numCodes = 10;
 extern CAN can;
+extern BMSData bms;
 char dummy = 1;
+int numCodes = 10;
 CanHandle canHandles[10];
 
 #if PRIMARY
@@ -32,9 +33,18 @@ void tmpBmsCellBroadcast() {
 	free(data);
 }
 
+void resizeBmsCells(char newMaxCell) {
+	realloc((void*)bms->cells, newMaxCell*sizeof(CellData));
+	for(i = bms->cellMax; i++; i<newMaxCell) {
+		bms->cells[i].cellId = i;
+	}
+
+	bms->cellMax = newMaxCell;
+	
+}
+
 void bmsCellBroadcast(CANMessage *recieve) {
 	void *tmp = (void*)calloc(8,1); // 8 bytes recieved from CAN	
-	printf("Length %d\r\n", recieve->len);
 	memcpy(tmp, recieve->data, 8);
 	// byte 0: cell id
 	// byte 1/2: instant voltage (0.1mv)
@@ -58,8 +68,42 @@ void bmsCellBroadcast(CANMessage *recieve) {
 	printf("\n\r");
 	printf("Cell id: %d\n\rVoltage: %d\n\rOpenVoltage: %d\n\rCheck: %d\n\rCheck 2: %d\n\r",
 		cellId, voltage, openVoltage, checkSum, validation);
+	
+	// Save data to bms struct
+	if(cellId > bms->cellMax)
+		resizeBmsCells(cellId);
+	CellData* cell = bms->cells[cellId];
+	cell->voltage = voltage;
+	cell->openVoltage = openVoltage;
+	cell->resistance = resistance;
 
 	free(tmp);
+}
+
+void bmsMessage1(CANMessage *recieve) {
+	// byte 0: const
+	// byte 1: const
+	// byte 2: blank
+	// byte 3: simulated SOC
+	// byte 4: high temp
+	// byte 5: low temp
+	// byte 6: CRC Checksum
+ 	// byte 7: blank
+	char *data = recieve->data;
+	unsigned char highT = 0, lowT = 0, soc = 0;
+
+	highT = data[4]; lowT = data[5];
+	soc = data[3];
+
+	printf("High Temp: %d\t|\t Low Temp: %d\r\n", highT, lowT);
+	bms->maxTemp = highT;
+	bms->minTemp = lowT;
+}
+
+void bmsDischargeEnable() {
+	// TODO Add specifics
+
+	CANMessage(0x000, &dummy, 1);
 }
 
 void canLogger(CANMessage *recieve) {
@@ -134,12 +178,15 @@ int initializeCanParser() {
 	canHandles[2].header = 0x0036;
 	canHandles[2].func = &bmsCellBroadcast;
 
-	printf("Done\n");
+	canHandles[3].header = 0x360;
+	canHandles[3].func = &bmsMessage1;
+
+	printf("Done\n\r");
 	return 0;
 }
 
 int canHandler(CANMessage* msg) {
-	printf("Recieved CAN Message\n");
+	printf("Recieved CAN Message\n\r");
 	for(int i = 0; i<numCodes; i++) {
 		if(canHandles[i].header == msg->id) {
 			canHandles[i].func(msg);
