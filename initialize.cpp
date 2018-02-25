@@ -3,11 +3,13 @@
 #include "main.h"
 
 CAN can(PA_11, PA_12);
-BMSData bms;
+BMSData *bms;
 
 char CanBMS = 0; // Do we have a BMS on CAN?
 
 extern CanHandle* canHandles;
+
+int initializeBms();
 
 int initializeCan() {
 	can.frequency(250e3);
@@ -17,18 +19,18 @@ int initializeCan() {
 
 int checkCanDevices() {
 	char dummy = 1;
-	CAN.write(0x700, &dummy, 1);
+	can.write(CANMessage(0x700, &dummy, 1));
 	CANMessage* incoming;
 
 	unsigned int time = 0;
 	while (time < 1000) {
-		if(CAN.read(incoming)) {
-			switch (incoming.id) {
+		if(can.read(*incoming)) {
+			switch (incoming->id) {
 				case 0x7E3:
 					CanBMS = 1;
 					break;
 				default:
-					printf("Unrecognized CAN ID: 0x%x\n\r", incoming.id);
+					printf("Unrecognized CAN ID: 0x%x\n\r", incoming->id);
 	
 			}
 		}
@@ -41,8 +43,8 @@ int checkCanDevices() {
 }
 int initializeBms() {
 	printf("Attempting to initialize BMS...");
-	bms = malloc(sizeof(BMSData);
-	bms->cells = malloc(8);
+	bms = (BMSData*)malloc(sizeof(BMSData));
+	bms->cells = (CellData*)malloc(sizeof(CellData[8]));
 	for(int i = 0; i<8; i++) {
 		bms->cells[i].cellId = i;
 	}

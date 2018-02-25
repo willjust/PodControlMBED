@@ -4,7 +4,7 @@
 
 extern DigitalOut heartBeatLED;
 extern CAN can;
-extern BMSData bms;
+extern BMSData *bms;
 char dummy = 1;
 int numCodes = 10;
 CanHandle canHandles[10];
@@ -35,7 +35,7 @@ void tmpBmsCellBroadcast() {
 
 void resizeBmsCells(char newMaxCell) {
 	realloc((void*)bms->cells, newMaxCell*sizeof(CellData));
-	for(i = bms->cellMax; i++; i<newMaxCell) {
+	for(int i = bms->cellMax; i++; i<newMaxCell) {
 		bms->cells[i].cellId = i;
 	}
 
@@ -72,7 +72,7 @@ void bmsCellBroadcast(CANMessage *recieve) {
 	// Save data to bms struct
 	if(cellId > bms->cellMax)
 		resizeBmsCells(cellId);
-	CellData* cell = bms->cells[cellId];
+	CellData* cell = &bms->cells[cellId];
 	cell->voltage = voltage;
 	cell->openVoltage = openVoltage;
 	cell->resistance = resistance;
@@ -89,7 +89,7 @@ void bmsMessage1(CANMessage *recieve) {
 	// byte 5: low temp
 	// byte 6: CRC Checksum
  	// byte 7: blank
-	char *data = recieve->data;
+	unsigned char *data = recieve->data;
 	unsigned char highT = 0, lowT = 0, soc = 0;
 
 	highT = data[4]; lowT = data[5];
