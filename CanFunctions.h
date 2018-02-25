@@ -1,13 +1,16 @@
 #ifndef _CAN_FUNCTIONS_H_
 #define _CAN_FUNCTIONS_H_
 
+#include "mbed.h"
+#include "main.h"
+
 /**
   * Contains function to be called when a header is recieved
   * @param int number of bytes recieved
   * @param int* recieve field of CANMessage
   */
 typedef struct {
-	uint header;
+	unsigned int header;
 	void (*func)(CANMessage *recieve);
 } CanHandle;
 
