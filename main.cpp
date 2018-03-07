@@ -7,8 +7,15 @@ DigitalOut initSucceed(PA_0);
 DigitalOut errorPin(PA_1);
 DigitalOut heartBeatLED(PA_3);
 extern CAN can;
+extern Serial pc;
+
+void printBms() {
+	
+}
 
 int main() {
+	char *input = (char*)malloc(100*sizeof(char));
+
 	printf("Successfully started program, %d.\n", PRIMARY);
     CANMessage msg;
 
@@ -17,14 +24,18 @@ int main() {
 #if PRIMARY 
 	printf("Primary board set\n");
 	Ticker masterHeartbeat;
-//	masterHeartbeat.attach(&heartbeat, 1);
+	//masterHeartbeat.attach(&heartbeat, 1);
 #endif
 	while(1) {
+//		pc.gets(input, 100*sizeof(char));
+//		printf("%s\n\r", input);
 		if(can.read(msg)) {
 			canLogger(&msg);
 			canHandler(&msg);	
-			heartBeatLED = !heartBeatLED;
 		}
 	}
+
+	
+	free(input);
     return 0;   
 }

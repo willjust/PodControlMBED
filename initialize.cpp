@@ -2,17 +2,17 @@
 #include "CanFunctions.h"
 #include "main.h"
 
+Serial pc(USBTX, USBRX);
 CAN can(PA_11, PA_12);
+
 BMSData *bms;
-
 char CanBMS = 0; // Do we have a BMS on CAN?
-
 extern CanHandle* canHandles;
 
 int initializeBms();
 
 int initializeCan() {
-	can.frequency(250e3);
+	can.frequency(500e3);
 	initializeCanParser();
 	return 0;
 }
@@ -57,7 +57,6 @@ int initializeBms() {
 /*****************************************************************************/
 
 #if PRIMARY
-Serial pc(USBTX, USBRX);
 
 /**
   * Initialization for test board 1

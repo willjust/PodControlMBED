@@ -1,11 +1,13 @@
-#include "Can_BMS.h"
+#include "BMS.h"
+#include "structs.h"
 
 extern CAN can;
 extern BMSData *bms;
 
 void resizeBmsCells(char newMaxCell) {
+	if(newMaxCell > 32) return;
 	realloc((void*)bms->cells, newMaxCell*sizeof(CellData));
-	for(int i = bms->cellMax; i++; i<newMaxCell) {
+	for(int i = bms->cellMax; i<newMaxCell; i++) {
 		bms->cells[i].cellId = i;
 	}
 
@@ -58,11 +60,13 @@ void bmsCellBroadcast(CANMessage *recieve) {
 	// Save data to bms struct
 	if(cellId > bms->cellMax)
 		resizeBmsCells(cellId);
-	CellData* cell = &bms->cells[cellId];
-	cell->voltage = voltage;
-	cell->openVoltage = openVoltage;
-	cell->resistance = resistance;
-
+	if(cellId < bms->cellMax) {
+		printf("Hello %d\n", bms->cellMax);
+		CellData* cell = &bms->cells[cellId];
+		cell->voltage = voltage;
+		cell->openVoltage = openVoltage;
+		cell->resistance = resistance;
+	}
 	free(tmp);
 }
 
@@ -87,7 +91,7 @@ void bmsMessage1(CANMessage *recieve) {
 }
 
 int initializeBmsCan(CanHandle* fxnList) {
-	fxnList[0].header = 0x0036;
+	fxnList[0].header = 0x0653;
 	fxnList[0].func = &bmsCellBroadcast;
 
 	// High-Low-SOC Message

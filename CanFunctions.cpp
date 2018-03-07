@@ -1,13 +1,11 @@
-#include "mbed.h"
 #include "CanFunctions.h"
-#include "main.h"
-#include "Can_BMS.h"
 
 extern DigitalOut heartBeatLED;
 extern CAN can;
 char dummy = 1;
 int numCodes = 10;
 CanHandle canHandles[10];
+
 
 #if PRIMARY
 const int numNodes = 2;
@@ -18,10 +16,19 @@ int nodeIds[numNodes];
 #endif
 
 
+int printAllow = 0;
+void resetTime() {
+	printAllow = 0;
+}
 
 void canLogger(CANMessage *recieve) {
 #if PRIMARY
+//	if(printAllow == 1) return;
+	Ticker ticker;
+	ticker.attach(&resetTime, 1);
+
 	printf("Incoming CAN Frame: 0x%04x\t\n\r", recieve->id);
+	printAllow = 1;
 	for(int i = 0; i < recieve->len; i++)
 		printf("%d, ", recieve->data[i]);
 	printf("\r\n");
@@ -37,12 +44,12 @@ void heartbeat() {
 #if PRIMARY
 	can.write(CANMessage(0x700, &dummy, 1));
 	heartbeatCount++;
-	printf("Heartbeat %d sent\n", heartbeatCount);
+	printf("Heartbeat %d sent\n\r", heartbeatCount);
 	aliveNodes[0] = 1;
 	// Reset alive nodes
 	for(int i = 0; i<numNodes; i++) {
 		if(aliveNodes[i] != 1) {
-			printf("WARNING: Node %d offline\n", nodeIds[i]);
+		//	printf("WARNING: Node %d offline\n", nodeIds[i]);
 		}
 		aliveNodes[i] = 0;
 	}
