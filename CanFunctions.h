@@ -4,7 +4,6 @@
 #include "mbed.h"
 #include "main.h"
 #include "BMS.h"
-#include "structs.h"
 
 void tmpBmsCellBroadcast();
 void heartbeat();

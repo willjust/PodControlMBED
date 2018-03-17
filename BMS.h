@@ -1,11 +1,6 @@
 #ifndef _CAN_BMS_H_
 #define _CAN_BMS_H_
-#include "mbed.h"
-
-typedef struct {
-	unsigned int header;
-	void (*func)(CANMessage *recieve);
-} CanHandle;
+#include "structs.h"
 
 int initializeBmsCan(CanHandle *funcList, int start);
 

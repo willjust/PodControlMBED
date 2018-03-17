@@ -10,24 +10,22 @@ DigitalOut heartBeatLED(PA_3);
 extern CAN can;
 extern Serial pc;
 
+typedef enum{
+	printStatus = 1
+} Command;
+
 int main() {
 	char *input = (char*)malloc(100*sizeof(char));
-
-	printf("Successfully started program, %d.\n\r", PRIMARY);
+	Command in;
     CANMessage msg;
 
 	init(initSucceed);
 
-#if PRIMARY 
-	printf("Primary board set\n\r");
-	Ticker masterHeartbeat;
-	//masterHeartbeat.attach(&heartbeat, 1);
-#endif
 	while(1) {
 		pc.gets(input, 100*sizeof(char));
 		printf("%s\n\r", input);
-		switch (input) {
-			case "printStatus":
+		switch (in) {
+			case 1:
 				printPodStatus();
 				break;
 			default:
