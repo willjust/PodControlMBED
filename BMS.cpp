@@ -90,13 +90,13 @@ void bmsMessage1(CANMessage *recieve) {
 	bms->minTemp = lowT;
 }
 
-int initializeBmsCan(CanHandle* fxnList) {
-	fxnList[0].header = 0x0653;
-	fxnList[0].func = &bmsCellBroadcast;
+int initializeBmsCan(CanHandle* fxnList, int start) {
+	fxnList[start].header = 0x0653;
+	fxnList[start].func = &bmsCellBroadcast;
 
 	// High-Low-SOC Message
-	fxnList[1].header = 0x360;
-	fxnList[1].func = &bmsMessage1;
+	fxnList[start+1].header = 0x360;
+	fxnList[start+1].func = &bmsMessage1;
 
 	return 2;
 

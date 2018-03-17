@@ -6,10 +6,13 @@ Serial pc(USBTX, USBRX);
 CAN can(PA_11, PA_12);
 
 BMSData *bms;
+RMSData *rms;
+
 char CanBMS = 0; // Do we have a BMS on CAN?
 extern CanHandle* canHandles;
 
 int initializeBms();
+int initializeRms();
 
 int initializeCan() {
 	can.frequency(500e3);
@@ -41,6 +44,11 @@ int checkCanDevices() {
 		initializeBms();
 	}
 }
+
+int initializeRms() {
+	rms=(RMSData*)malloc(sizeof(RMSData));
+}
+
 int initializeBms() {
 	printf("Attempting to initialize BMS...");
 	bms = (BMSData*)malloc(sizeof(BMSData));

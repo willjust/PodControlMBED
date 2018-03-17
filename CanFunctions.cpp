@@ -1,10 +1,12 @@
 #include "CanFunctions.h"
+#include "RMS.h"
+#include "BMS.h"
 
 extern DigitalOut heartBeatLED;
 extern CAN can;
 char dummy = 1;
 int numCodes = 10;
-CanHandle canHandles[10];
+CanHandle canHandles[20];
 
 
 #if PRIMARY
@@ -84,7 +86,7 @@ void emergencyError(CANMessage *recieve) {
 }
 
 /**
-  * TODO Better method?
+  * Better method?
   */
 int initializeCanParser() {
 	printf("Initialize CAN functions...");
@@ -95,8 +97,10 @@ int initializeCanParser() {
 	canHandles[1].header = 0x701; // Need to add one of these for every slave
 	canHandles[1].func = &heartbeatSlave;
 
-	initializeBmsCan(&canHandles[2]);
-	
+	// TODO Make better
+	int numFuncs = initializeBmsCan(canHandles, 2);
+	initializeRmsCan(canHandles, 2+numFuncs);	
+
 	printf("Done\n\r");
 	return 0;
 }
