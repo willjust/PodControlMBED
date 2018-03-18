@@ -14,32 +14,42 @@ typedef enum{
 	printStatus = 1
 } Command;
 
-int main() {
-	char *input = (char*)malloc(100*sizeof(char));
-	Command in;
-    CANMessage msg;
-
-	init(initSucceed);
-
-	while(1) {
-		pc.gets(input, 100*sizeof(char));
-		printf("%s\n\r", input);
-		switch (in) {
-			case 1:
+void commandline() {
+	char *input = (char*) malloc(100*sizeof(char));
+	while(true) {
+		if(pc.readable()) {
+			pc.gets(input,100);
+			if (strcmp(input, "printStatus")) {
 				printPodStatus();
-				break;
-			default:
-				printf("Commands\r\n");
-				printf("\tprintStatus - Prints BMS/RMS data.\r\n");
-
-		}
-		if(can.read(msg)) {
-//			canLogger(&msg);
-//			canHandler(&msg);	
+			}
+		} else {
+			Thread::wait(500);
 		}
 	}
-
-	
 	free(input);
+}
+
+void CanListener() {
+	CANMessage msg;
+	while(true) {
+		if(can.read(msg)) {
+//			canLogger(&msg);
+			canHandler(&msg);
+		}
+	}
+	
+}
+
+int main() {
+	init(initSucceed);
+
+	Thread cli, canBus;
+	cli.start(commandline);
+	canBus.start(CanListener);
+
+	while(true) {
+		Thread::wait(1000);
+	}
+	
     return 0;   
 }
